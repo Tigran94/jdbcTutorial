@@ -97,29 +97,6 @@ public class DbHelper {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-//        String sqlFrom = "select balance from users" +
-//                " where id = "+ userFrom + ";";
-//        String sqlTo = "select balance from users" +
-//                " where id = "+ userTo + ";";
-//
-//        try {
-//            Statement idStatement = connection.createStatement();
-//            ResultSet resultSet = idStatement.executeQuery(sqlFrom);
-//            resultSet.next();
-//            double from = resultSet.getDouble("balance");
-//
-//            resultSet = idStatement.executeQuery(sqlTo);
-//            resultSet.next();
-//            double to = resultSet.getDouble("balance");
-//
-//
-//            cashFlow(userTo)
-//
-//        } catch (SQLException e) {
-//            System.out.println(e.getMessage());
-//            System.out.println("Error while changing the balance");
-//        }
-
     }
 
     static List<User> listUsers() {
