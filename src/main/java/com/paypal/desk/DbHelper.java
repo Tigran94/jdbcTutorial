@@ -1,8 +1,12 @@
 package com.paypal.desk;
 
+import com.mysql.jdbc.*;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,22 +30,17 @@ public class DbHelper {
     }
 
     static int createUser(String firstName, String lastName) {
-        String sql = "insert into users " +
-                "(first_name, last_name)" +
-                " values (" +
-                "'" + firstName + "'" +
-                ", " +
-                "'" + lastName + "'" +
-                ")";
+        String sql = "insert into users (first_name, last_name) values (?,?);";
 
         try {
-            Statement statement = connection.createStatement();
-            statement.execute(sql);
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1,firstName);
+            statement.setString(2,lastName);
+            statement.execute();
 
             String idSql = "select max(id) from users";
             Statement idStatement = connection.createStatement();
             ResultSet resultSet = idStatement.executeQuery(idSql);
-
             resultSet.next();
             return resultSet.getInt(1);
         } catch (SQLException e) {
@@ -58,12 +57,12 @@ public class DbHelper {
      * @param amount double value of the amount to insert
      */
     static void cashFlow(int userId, double amount) {
-        String sql = "update users " +
-                "set balance = balance + " + amount +
-                "where id = " + userId+";";
+        String sql = "update users set balance = balance + ? where id = ?;";
         try {
-            Statement statement = connection.createStatement();
-            statement.execute(sql);
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setDouble(1,amount);
+            statement.setInt(2,userId);
+            statement.execute();
         } catch (SQLException e) {
             System.out.println("Error while changing the balance");
         }
@@ -78,22 +77,15 @@ public class DbHelper {
      * @param amount   transaction amount
      */
     static void transaction(int userFrom, int userTo, double amount) {
-        String sql = "insert into transactions " +
-                "(user_from, user_to,transaction_amount)" +
-                " values (" +
-                "'" + userFrom + "'" +
-                ", " +
-                "'" + userTo + "'" +
-                ", " +
-                "'" + amount + "'" +
-                ")";
+        String sql = "insert into transactions (user_from, user_to,transaction_amount) values (?,?,?)";
         cashFlow(userFrom, -amount);
         cashFlow(userTo,amount);
-
-        Statement statement = null;
         try {
-            statement = connection.createStatement();
-            statement.execute(sql);
+            PreparedStatement statement  = connection.prepareStatement(sql);
+            statement.setInt(1,userFrom);
+            statement.setInt(2,userTo);
+            statement.setDouble(3,amount);
+            statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -103,7 +95,8 @@ public class DbHelper {
         String sql = "select * from users";
 
         try {
-            Statement statement = connection.createStatement();
+
+            PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultSet = statement.executeQuery(sql);
 
             List<User> userList = new ArrayList<>();
@@ -129,8 +122,8 @@ public class DbHelper {
         String sql = "select * from transactions";
 
         try {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(sql);
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet resultSet = statement.executeQuery();
 
             List<Transaction> transactionList = new ArrayList<>();
 
